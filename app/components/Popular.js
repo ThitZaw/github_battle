@@ -30,7 +30,7 @@ export default class Popular extends React.Component{
     super(props)
     this.state = {
         selectedLanguage : 'All',
-        repos:null,   // 1.add the repos and error properties to the state
+        repos:{},   // 1.add the repos and error properties to the state
         error:null,
     }
     this.updateLanguage = this.updateLanguage.bind(this)
@@ -42,26 +42,35 @@ export default class Popular extends React.Component{
     }
 
     updateLanguage(selectedLanguage){
+        console.log(this.state.repos)
         this.setState({
             selectedLanguage,
             error:null, // 3.whenever the state is update error and repos need to be null first before update the state 
-            repos:null
         })
-        fetchPopularRepo(selectedLanguage)// 4. call fetchPopular Repo
-        .then((repos)=>this.setState({
-            repos,
-            error: null,
-        }))
-        .catch(()=>{
-            console.warn('Error Fetching the selected Language Repo')
-            this.setState({
-                error: 'there was an erro fetching the selected language'
+
+        if (!this.state.repos[selectedLanguage]){
+            fetchPopularRepo(selectedLanguage)
+            .then((data)=>{
+                this.setState(({repos})=>({
+                    repos:{
+                        ...repos,
+                        [selectedLanguage]:data
+                    }
+                }))
             })
-        })
+            .catch(()=>{
+                console.warn('Error Fetching the selected Language Repo')
+                this.setState({
+                    error: 'there was an erro fetching the selected language'
+                })
+            })
+        }
     }
 
     isLoading(){ // 5. add the loading function
-        return this.state.repos == null && this.state.error == null 
+        const { selectedLanguage, repos, error } = this.state
+
+        return !repos[selectedLanguage] && error === null 
     }
 
     render(){
@@ -71,7 +80,7 @@ export default class Popular extends React.Component{
                 <LanguagesNav selected={selectedLanguage} onUpdateLanguage={this.updateLanguage}/>
                 {this.isLoading() && <p>LOADING</p>} 
                 {error && <p>{error}</p>}
-                {repos && <pre>{JSON.stringify(repos, null, 2)}</pre>}
+                {repos[selectedLanguage] && <pre>{JSON.stringify(repos[selectedLanguage], null, 2)}</pre>}
             </React.Fragment>
         )
     }
