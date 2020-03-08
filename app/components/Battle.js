@@ -122,7 +122,7 @@ export default class Battle extends React.Component {
             playerTwo : null,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleReset = this.handleReset(this)
+        this.handleReset = this.handleReset.bind(this)
     }
 
     handleSubmit(id, player) {
